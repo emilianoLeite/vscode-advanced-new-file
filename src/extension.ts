@@ -129,6 +129,26 @@ async function subdirOptionsForRoot(
   });
 }
 
+function createFile(absolutePath: string) {
+  switch (path.extname(absolutePath)) {
+    case '.rb':
+      const fileName = path.basename(absolutePath, path.extname(absolutePath));
+      const fileContents = rubyClassFile(fileName);
+      fs.appendFileSync(absolutePath, fileContents);
+      break;
+
+    default:
+      fs.appendFileSync(absolutePath, '');
+      break;
+  }
+}
+
+function rubyClassFile(fileName: string) {
+  const rubyClassName = fileName.charAt(0).toUpperCase() + fileName.slice(1);
+
+  return `class ${rubyClassName}\n\nend`;
+}
+
 export function showQuickPick(
   choices: Promise<vscode.QuickPickItem[]>): Thenable<QuickPickItem> {
 
@@ -196,7 +216,7 @@ export function createFileOrFolder(absolutePath: string): void {
       mkdirp.sync(absolutePath);
     } else {
       mkdirp.sync(directoryToFile);
-      fs.appendFileSync(absolutePath, '');
+      createFile(absolutePath);
     }
   }
 }

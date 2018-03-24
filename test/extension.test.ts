@@ -22,14 +22,14 @@ describe('Advanced New File', () => {
           vscode: {
             window: {
               showInputBox: () => {
-                return Promise.resolve('input/path/to/file.rb');
+                return Promise.resolve('input/path/to/file.ts');
               }
             }
           }
         }) as typeof AdvancedNewFile;
 
       const expectedPath =
-        path.join('/', 'base', 'dir', 'input', 'path', 'to', 'file.rb');
+        path.join('/', 'base', 'dir', 'input', 'path', 'to', 'file.ts');
 
       const directory: AdvancedNewFile.DirectoryOption = {
         displayText: 'foo',
@@ -195,10 +195,10 @@ describe('Advanced New File', () => {
           AdvancedNewFile.createFileOrFolder(newFileDescriptor);
 
           expect(fs.statSync(path.join(tmpDir, 'path')).isDirectory())
-            .to.be.true;
+          .to.be.true;
 
           expect(fs.statSync(path.join(tmpDir, 'path/to')).isDirectory())
-            .to.be.true;
+          .to.be.true;
         });
 
         it('creates an empty file', () => {
@@ -206,6 +206,19 @@ describe('Advanced New File', () => {
 
           expect(fs.readFileSync(newFileDescriptor, { encoding: 'utf8' }))
             .to.eq('');
+        });
+
+        context('with extension ".rb"', () => {
+          const newFileDescriptor = path.join(tmpDir, 'path/to/file.rb');
+
+          it('creates a file with a Ruby class corresponding to the file name', () => {
+            const expectedContents = "class File\n\nend"
+
+            AdvancedNewFile.createFileOrFolder(newFileDescriptor);
+
+            expect(fs.readFileSync(newFileDescriptor, { encoding: 'utf8' }))
+              .to.eq(expectedContents);
+          });
         });
       });
 
@@ -703,7 +716,7 @@ describe('Advanced New File', () => {
             showQuickPick: () => Promise.resolve({
               label: '/path/to', option: selectedOption
             }),
-            showInputBox: () => Promise.resolve('/input/path/to/file.rb'),
+            showInputBox: () => Promise.resolve('/input/path/to/file.ts'),
             showTextDocument
           }
         },
@@ -722,7 +735,7 @@ describe('Advanced New File', () => {
       const context = { subscriptions: [] };
 
       const newFileDescriptor =
-        path.join(selectedAbsoluteDir, '/input/path/to/file.rb');
+        path.join(selectedAbsoluteDir, '/input/path/to/file.ts');
 
       return advancedNewFile.command(context).then(() => {
         expect(openTextDocument)
